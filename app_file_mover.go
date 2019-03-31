@@ -1,0 +1,258 @@
+package main
+
+import (
+	"flag"
+	"os"
+
+	. "github.com/SilentGopherLnx/easygolang"
+	. "github.com/SilentGopherLnx/easygolang/easylinux"
+)
+
+const OPERATION_DEMO = "demo"
+const OPERATION_COPY = "copy"
+const OPERATION_MOVE = "move"
+const OPERATION_DELETE = "delete"
+const OPERATION_CLEAR = "clear"
+
+var operation string
+var oper_single = false
+var oper_demo = false
+
+var path_src []*LinuxPath = []*LinuxPath{}
+var files_src []os.FileInfo = []os.FileInfo{}
+var path_src_visual string = ""
+var path_dst *LinuxPath = NewLinuxPath(false)
+
+var src_size *AInt64 = NewAtomicInt64(0)
+var src_files *AInt64 = NewAtomicInt64(0)
+var src_folders *AInt64 = NewAtomicInt64(0)
+var src_unread *AInt64 = NewAtomicInt64(0)
+var src_irregular *AInt64 = NewAtomicInt64(0)
+var src_mount *AInt64 = NewAtomicInt64(0)
+var src_symlinks *AInt64 = NewAtomicInt64(0)
+var dst_free *AInt64 = NewAtomicInt64(0)
+var done_bytes *AInt64 = NewAtomicInt64(0)
+var done_files *AInt64 = NewAtomicInt64(0)
+var current_file *AString = NewAtomicString("")
+
+var work = NewAtomicBool(false, [2]string{"Y", "N"})
+
+var time_start *Time = nil
+var time_end *Time = nil
+
+var BUFFER_SIZE = 1024 * 64
+
+var mount_list [][2]string
+
+var gui_chan_cmd chan FileInteractiveResponse = make(chan FileInteractiveResponse)
+var gui_chan_ask chan FileInteractiveRequest = make(chan FileInteractiveRequest)
+
+var src_disk, dst_disk string
+
+func init() {
+
+	var path_src_url string = ""
+	var path_dst_url string = ""
+	var buf_1024 = 0
+
+	flag.StringVar(&operation, "cmd", OPERATION_DEMO, "copy,move,delete,clear")
+	flag.StringVar(&path_src_url, "src", "", "source url array (new line is separator) - file:// or smb:// and ....")
+	flag.StringVar(&path_dst_url, "dst", "", "destination url folder file:// or smb:// and ....")
+	flag.IntVar(&buf_1024, "buf", 64, "buffer size in bytes (value will be multiplied by 1024!!)")
+	flag.Parse()
+
+	if !flag.Parsed() {
+		Prln("wrong flags")
+		AppExit(1)
+	}
+
+	BUFFER_SIZE = MINI(256, MAXI(1, buf_1024)) * 1024
+
+	if operation == OPERATION_DEMO {
+		oper_demo = true
+		//operation = "copy"
+		// path_src_url = "file:///mnt/dm-1/golang/my_code/FileMoverGui/test/file1.txt"
+		// path_dst_url = "file:///mnt/dm-1/golang/my_code/FileMoverGui/test/to/"
+
+		// path_src_url = "file:///mnt/dm-1/golang/my_code/GopherFileManager/test_dir/New Folder/"
+		// path_dst_url = "file:///mnt/dm-1/golang/my_code/GopherFileManager/test_dir/щ/"
+	} else {
+
+	}
+
+	operation = StringDown(StringTrim(operation))
+	oper_arr := []string{OPERATION_COPY, OPERATION_MOVE, OPERATION_DELETE, OPERATION_CLEAR}
+	if StringInArray(operation, oper_arr) == -1 {
+		Prln("Wrong operation command")
+		AppExit(2)
+	}
+
+	path_dst_url = StringTrim(path_dst_url)
+	path_dst.SetUrl(path_dst_url)
+
+	path_src_arr := StringSplitLines(path_src_url)
+	for j := 0; j < len(path_src_arr); j++ {
+		new_path := NewLinuxPath(false)
+		path_src_arr[j] = StringTrim(path_src_arr[j])
+		if len(path_src_arr[j]) > 0 {
+			new_path.SetUrl(path_src_arr[j])
+			if new_path.GetParseProblems() {
+				Prln("Parsing problem [src]:" + path_src_arr[j])
+				AppExit(3)
+			}
+			path_src = append(path_src, new_path)
+		}
+	}
+	if len(path_src) == 0 {
+		Prln("File list is empty!")
+		AppExit(4)
+	}
+
+	if operation == OPERATION_DELETE || operation == OPERATION_CLEAR {
+		oper_single = true
+	} else {
+		if len(path_dst_url) == 0 {
+			Prln("Destination is empty!")
+			AppExit(5)
+		}
+		if path_dst.GetParseProblems() {
+			Prln("Parsing problem [dst]:" + path_dst_url)
+			AppExit(6)
+		}
+	}
+
+	mount_list = LinuxGetMountList()
+	if len(path_src) > 0 {
+		src_disk = LinuxFilePartition(mount_list, path_src[0].GetReal())
+		for j := 1; j < len(path_src); j++ {
+			src_disk_1 := LinuxFilePartition(mount_list, path_src[j].GetReal())
+			if src_disk_1 != src_disk {
+				Prln("Src file at [" + I2S(j+1) + "] position have not same disk with first file:" + src_disk)
+				AppExit(7)
+			}
+		}
+		if src_disk == "" {
+			Prln("Src disk not detected")
+			AppExit(8)
+		}
+	}
+	if !oper_single {
+		dst_disk = LinuxFilePartition(mount_list, path_dst.GetReal())
+		if dst_disk == "" {
+			Prln("Dst disk not detected")
+			AppExit(9)
+		}
+	}
+
+	if !oper_single {
+		//go func() {
+		dst_free.Set(FolderLinuxFreeSpace(path_dst.GetReal()))
+		//}()
+	}
+
+	GUI_Init()
+
+}
+
+func main() {
+
+	pre_read_errs := ""
+	for j := 0; j < len(path_src); j++ {
+		problem := false
+		real1 := path_src[j].GetReal()
+		real2, err := FileEvalSymlinks(real1)
+		if err == nil {
+			if FilePathEndSlashRemove(real1) != FilePathEndSlashRemove(real2) {
+				path_src[j].SetReal(real2)
+			}
+			finfo, ok := FileInfo(real2)
+			if ok {
+				files_src = append(files_src, finfo)
+			} else {
+				problem = true
+			}
+		} else {
+			problem = true
+		}
+		if problem {
+			pre_read_errs += path_src[j].GetVisual() + "\n"
+		}
+	}
+
+	if len(pre_read_errs) > 0 {
+		GUI_Warn_SrcUnread(pre_read_errs)
+	}
+
+	visual_arr := []string{}
+	for j := 0; j < len(path_src); j++ {
+		visual_arr = append(visual_arr, path_src[j].GetVisual())
+	}
+	path_src_visual = StringJoin(visual_arr, "\n")
+
+	if oper_single {
+		GUI_Warn_SrcDelete(path_src_visual, operation == OPERATION_CLEAR)
+	}
+
+	go oper_switch_runner()
+
+	GUI_Create()
+
+	//timelast := TimeNow()
+	for {
+
+		GUI_Iteration()
+
+		select {
+		case q := <-gui_chan_ask:
+			GUI_Ask_File(q, gui_chan_cmd)
+		default:
+			//CONTINUE!!
+		}
+
+		//q, ok := ChanGetOrSkip(gui_chan_cmd.(chan interface{}))
+		// if ok {
+		// 	str := q.(string)
+		// 	GUI_Ask_File(str, gui_chan_cmd)
+		// }
+
+		// if TimeSeconds(timelast) > 0.5 {
+		// 	//win.ShowAll()
+		// 	timelast = TimeNow()
+		// }
+		RuntimeGosched()
+	}
+}
+
+func oper_switch_runner() {
+	Prln(operation)
+	for j := 0; j < len(path_src); j++ {
+		FoldersRecursively_Size(mount_list, files_src[j], path_src[j].GetReal(), src_size, src_files, src_folders, src_unread, src_irregular, src_mount, src_symlinks)
+	}
+	Prln("starting...")
+	work.Set(true)
+	switch operation {
+	case OPERATION_COPY:
+		dst_real := path_dst.GetReal()
+		for j := 0; j < len(path_src); j++ {
+			FoldersRecursively_Copy(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_files, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file)
+		}
+	case OPERATION_MOVE:
+		dst_real := path_dst.GetReal()
+		for j := 0; j < len(path_src); j++ {
+			FoldersRecursively_Move(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_files, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file, src_disk == dst_disk)
+		}
+	case OPERATION_DELETE:
+		for j := 0; j < len(path_src); j++ {
+			FoldersRecursively_Delete(mount_list, files_src[j], path_src[j].GetReal(), done_bytes, done_files, current_file)
+		}
+	case OPERATION_CLEAR:
+
+	}
+	work.Set(false)
+	if done_bytes.Get() == src_size.Get() {
+		Prln("done")
+		AppExit(0)
+	} else {
+		Prln("done, waiting...")
+	}
+}
