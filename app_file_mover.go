@@ -123,9 +123,9 @@ func init() {
 
 	mount_list = LinuxGetMountList()
 	if len(path_src) > 0 {
-		src_disk = LinuxFilePartition(mount_list, path_src[0].GetReal())
+		src_disk, _ = LinuxFilePartition(mount_list, path_src[0].GetReal())
 		for j := 1; j < len(path_src); j++ {
-			src_disk_1 := LinuxFilePartition(mount_list, path_src[j].GetReal())
+			src_disk_1, _ := LinuxFilePartition(mount_list, path_src[j].GetReal())
 			if src_disk_1 != src_disk {
 				Prln("Src file at [" + I2S(j+1) + "] position have not same disk with first file:" + src_disk)
 				AppExit(7)
@@ -137,16 +137,17 @@ func init() {
 		}
 	}
 	if !oper_single {
-		dst_disk = LinuxFilePartition(mount_list, path_dst.GetReal())
+		dp := ""
+		dst_disk, dp = LinuxFilePartition(mount_list, path_dst.GetReal())
 		if dst_disk == "" {
 			Prln("Dst disk not detected")
 			AppExit(9)
 		}
-	}
 
-	if !oper_single {
 		//go func() {
-		dst_free.Set(FolderLinuxFreeSpace(path_dst.GetReal()))
+		dp = FilePathEndSlashRemove(dp)
+		Prln(">>" + dp)
+		dst_free.Set(FolderLinuxFreeSpace(dp))
 		//}()
 	}
 

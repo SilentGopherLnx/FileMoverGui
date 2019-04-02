@@ -197,8 +197,8 @@ func GUI_Iteration() {
 
 	sizebytes := src_size.Get()
 	freebytes := dst_free.Get()
-	lbl_src_size.SetText(FileSizeNiceString(int64(sizebytes)) + " (" + I2Ss(sizebytes) + " bytes)")
-	lbl_dst_free.SetText(FileSizeNiceString(int64(freebytes))) //+ " (" + I2Ss(freebytes) + " bytes)")
+	lbl_src_size.SetText(FileSizeNiceString(sizebytes) + " (" + I2Ss(sizebytes) + " bytes)")
+	lbl_dst_free.SetText(FileSizeNiceString(freebytes)) //+ " (" + I2Ss(freebytes) + " bytes)")
 
 	sel_files := src_files.Get()
 	sel_folders := src_folders.Get()
@@ -287,6 +287,8 @@ func GUI_Ask_File(q FileInteractiveRequest, cmd chan FileInteractiveResponse) {
 		qs[0], qs[1] = "File exist at:", "Replace?"
 	case FILE_INTERACTIVE_ASK_ERROR:
 		qs[0], qs[1] = "File problem with:", "Try again?"
+	case FILE_INTERACTIVE_ASK_PANIC:
+		qs[0], qs[1] = "File problem with:", "Unsolveable =("
 	}
 	dial.SetMarkup("<b>" + HtmlEscape(qs[0]) + "</b>\n" + HtmlEscape(q.FileName) + "\n<b>" + HtmlEscape(qs[1]) + "</b>")
 
@@ -299,12 +301,17 @@ func GUI_Ask_File(q FileInteractiveRequest, cmd chan FileInteractiveResponse) {
 	}
 	area.ShowAll()
 
-	dial.SetDefaultResponse(gtk.RESPONSE_YES)
-	dial.AddButton("Yes", gtk.RESPONSE_YES)
-	if q.AskType == FILE_INTERACTIVE_ASK_EXIST {
-		dial.AddButton("Save with new name", gtk.RESPONSE_ACCEPT)
+	if q.AskType == FILE_INTERACTIVE_ASK_PANIC { // stop/skip?
+		dial.SetDefaultResponse(gtk.RESPONSE_NO)
+		dial.AddButton("OK", gtk.RESPONSE_NO)
+	} else {
+		dial.SetDefaultResponse(gtk.RESPONSE_YES)
+		dial.AddButton("Yes", gtk.RESPONSE_YES)
+		if q.AskType == FILE_INTERACTIVE_ASK_EXIST {
+			dial.AddButton("Save with new name", gtk.RESPONSE_ACCEPT)
+		}
+		dial.AddButton("No", gtk.RESPONSE_NO)
 	}
-	dial.AddButton("No", gtk.RESPONSE_NO)
 	dial.Connect("destroy", func() {
 		if !reported.Get() {
 			cmd <- FileInteractiveResponse{SaveChoice: false, Command: FILE_INTERACTIVE_SKIP}

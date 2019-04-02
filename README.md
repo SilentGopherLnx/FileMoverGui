@@ -32,12 +32,15 @@ https://github.com/SilentGopherLnx/easygolang
 # Status:
 App is under development and not versionized
 
-**Not all functions are implemented and realised as planned!**
+**Not all functions are implemented and realised as planned!** such as:
+- detail information for compare existing files when ask for repace
+- writing files to temporary name (half-copied files will not be looked as "ok")
+- corect speed and time left calculation
 
 License type is GPL3
 
 # Platform:
-Only Linux. Tested only on amd64 on Cinnamon desktop.
+**Only Linux!** Tested only on amd64 on Cinnamon desktop of Linux Mint.
 
 Windows support is NOT planned
 
