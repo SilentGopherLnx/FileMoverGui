@@ -34,17 +34,21 @@ App is under development and not versionized
 
 **Not all functions are implemented and realised as planned!** such as:
 - detail information for compare existing files when ask for repace
+- copy "modified time" files
 - writing files to temporary name (half-copied files will not be looked as "ok")
 - corect speed and time left calculation
+- free space check
+- ask if folders gonna be merged
+- ask for options for symlink...
 
-License type is GPL3
-
-# Platform:
+# Platform & License:
 **Only Linux!** Tested only on amd64 on Cinnamon desktop of Linux Mint.
 
 Windows support is NOT planned
 
-# Usage example for two files copy:
+**License type is GPL3**
+
+# Usage example for copy of two files:
 **golang:**
 > exec.Command("FileMoverGui", "-cmd", "copy", "-src", "file:///path_src/file1" + "\n" + "file:///path_src/file2", "-dst", "file:///path_dst/")
 
@@ -54,7 +58,7 @@ Windows support is NOT planned
 > \> file:///path_src/file2" -dst "file:///path_dst/"
 (yes. This is new line charater. You can input this if you have unclosed brakets)
 
-# Args:
+# Args for running:
 **-cmd**
 > copy - copy files list from **-src** to **-dst** folder
 >
