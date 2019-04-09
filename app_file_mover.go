@@ -70,10 +70,11 @@ func init() {
 
 	if operation == OPERATION_DEMO {
 		oper_demo = true
-		//operation = "copy"
+		// operation = "copy"
 		// path_src_url = "file:///mnt/dm-1/golang/my_code/FileMoverGui/test/file1.txt"
 		// path_dst_url = "file:///mnt/dm-1/golang/my_code/FileMoverGui/test/to/"
 
+		// operation = "copy"
 		// path_src_url = "file:///mnt/dm-1/golang/my_code/GopherFileManager/test_dir/New Folder/"
 		// path_dst_url = "file:///mnt/dm-1/golang/my_code/GopherFileManager/test_dir/щ/"
 	} else {

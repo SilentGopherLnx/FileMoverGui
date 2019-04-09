@@ -24,6 +24,7 @@ var lbl_done *gtk.Label
 var lbl_current *gtk.Label
 
 var progress *gtk.ProgressBar
+var spinner *gtk.Spinner
 
 var title_prev_perc = "?"
 
@@ -132,6 +133,13 @@ func GUI_Create() {
 	lbl_current.SetHAlign(gtk.ALIGN_START)
 	GTK_LabelWrapMode(lbl_current, 1)
 
+	spinner, _ = gtk.SpinnerNew()
+	spinner.Start()
+
+	box_current, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	box_current.Add(spinner)
+	box_current.Add(lbl_current)
+
 	//img2 := GTK_Image_From_Name("process-stop", gtk.ICON_SIZE_BUTTON)
 	// btn_abort, _ := gtk.ButtonNewWithLabel("Abort")
 	// btn_abort.SetImage(img2)
@@ -171,7 +179,7 @@ func GUI_Create() {
 
 	grid.Attach(progress, 0, 15, 2, 1)
 	//grid.Attach(btn_abort, 0, 16, 2, 1)
-	grid.Attach(lbl_current, 0, 16, 2, 1)
+	grid.Attach(box_current, 0, 16, 2, 1)
 
 	win.Add(grid)
 
@@ -218,7 +226,7 @@ func GUI_Iteration() {
 		if time_end == nil {
 			passed = TimeSeconds(*time_start)
 		} else {
-			passed = TimeSeconds2(*time_start, *time_end)
+			passed = TimeSecondsSub(*time_start, *time_end)
 		}
 	}
 
@@ -243,6 +251,11 @@ func GUI_Iteration() {
 	if perc >= 0.0 {
 		progress.SetFraction(perc)
 		title_func(perc * 100.0)
+	}
+
+	if !work.Get() && GTK_SpinnerActive(spinner, true) {
+		Prln("spinner off!")
+		spinner.Stop()
 	}
 
 }
