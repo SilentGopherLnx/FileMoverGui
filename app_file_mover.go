@@ -51,6 +51,8 @@ var src_disk, dst_disk string
 
 func init() {
 
+	AboutVersion(AppVersion())
+
 	var path_src_url string = ""
 	var path_dst_url string = ""
 	var buf_1024 = 0

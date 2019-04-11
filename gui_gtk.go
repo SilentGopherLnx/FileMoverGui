@@ -92,9 +92,14 @@ func GUI_Create() {
 	//scroll_scr.SetOverlayScrolling(true)
 	//scroll_scr.SetSizeRequest()
 
+	frame, _ := gtk.FrameNew("<b>Selected files:</b>")
+	frame.SetLabelWidget(lbl_src_name)
+	frame.Add(scroll_scr)
+
 	lbl_dst_name, _ := gtk.LabelNew("DST:")
 	lbl_dst_name.SetMarkup("<b>Destination folder:</b>")
 	lbl_dst_name.SetHExpand(true)
+	lbl_dst_name.SetVExpand(false)
 	lbl_dst_name.SetHAlign(gtk.ALIGN_START)
 
 	lbl_separator1, _ := gtk.LabelNew(" ")
@@ -105,6 +110,10 @@ func GUI_Create() {
 	//lbl_dst.SetJustify(gtk.JUSTIFY_LEFT)
 	lbl_dst.SetVAlign(gtk.ALIGN_START)
 	GTK_LabelWrapMode(lbl_dst, 1)
+
+	box_vdst, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	box_vdst.Add(lbl_dst_name)
+	box_vdst.Add(lbl_dst)
 
 	calc := "calculating..."
 
@@ -157,16 +166,17 @@ func GUI_Create() {
 	}
 
 	grid.Attach(box_src_disk, 0, 0, gui_w, 1)
-	grid.Attach(lbl_src_name, 0, 1, gui_w, 1)
-	grid.Attach(scroll_scr, 0, 2, gui_w, 1)
+	//grid.Attach(lbl_src_name, 0, 1, gui_w, 1)
+	grid.Attach(frame, 0, 1, gui_w, 2)
 	grid.Attach(lbl_separator1, 0, 3, gui_w, 1)
 	grid.Attach(box_src_size, 0, 4, gui_w, 1)
 	grid.Attach(box_src_files, 0, 5, gui_w, 1)
 
 	if !oper_single {
 		grid.Attach(box_dst_disk, 1, 0, 1, 1)
-		grid.Attach(lbl_dst_name, 1, 1, 1, 1)
-		grid.Attach(lbl_dst, 1, 2, 1, 1)
+		//grid.Attach(lbl_dst_name, 1, 1, 1, 1)
+		//grid.Attach(lbl_dst, 1, 2, 1, 1)
+		grid.Attach(box_vdst, 1, 1, 1, 2)
 		grid.Attach(lbl_separator2, 1, 3, 1, 1)
 		grid.Attach(box_dst_free, 1, 4, 1, 1)
 	}

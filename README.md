@@ -15,6 +15,7 @@ It also make check is you can do this. App can ask you some classic questions (a
 and so on...
 
 ![test picture](https://github.com/SilentGopherLnx/screenshots_and_binaries/blob/master/SCREENS_GopherFileManagerFileMoverGui/mover_01.png)
+![test picture](https://github.com/SilentGopherLnx/screenshots_and_binaries/blob/master/SCREENS_GopherFileManagerFileMoverGui/mover_02.png)
 
 # Dependencies for GOPATH:
 1) Golang GTK3 lib
@@ -30,7 +31,7 @@ https://github.com/SilentGopherLnx/easygolang
 (this package also have some unnessesary sub-packages)
 
 # Status:
-App is under development and not versionized
+App is under development (you can see version if run with "-v" argument)
 
 **Not all functions are implemented and realised as planned!** such as:
 - detail information for compare existing files when ask for repace
