@@ -283,6 +283,7 @@ func GUI_Warn_SrcUnread(pre_read_errs string) {
 func GUI_Warn_SrcDelete(path_src_visual string, clear_mode bool) {
 	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK_CANCEL, "Delete? :\n"+path_src_visual)
 	dial.SetTitle("Delete files?")
+	dial.SetMarkup("<b>Delete?</b>\n" + HtmlEscape(path_src_visual) + "<b> ?</b>")
 	dial.SetDefaultResponse(gtk.RESPONSE_OK)
 	resp := dial.Run()
 	if resp == gtk.RESPONSE_OK {
@@ -311,7 +312,7 @@ func GUI_Ask_File(q FileInteractiveRequest, cmd chan FileInteractiveResponse) {
 	case FILE_INTERACTIVE_ASK_ERROR:
 		qs[0], qs[1] = "File problem with:", "Try again?"
 	case FILE_INTERACTIVE_ASK_PANIC:
-		qs[0], qs[1] = "File problem with:", "Unsolveable =("
+		qs[0], qs[1] = "File problem with:", "Unsolvable =("
 	}
 	dial.SetMarkup("<b>" + HtmlEscape(qs[0]) + "</b>\n" + HtmlEscape(q.FileName) + "\n<b>" + HtmlEscape(qs[1]) + "</b>")
 
@@ -319,7 +320,7 @@ func GUI_Ask_File(q FileInteractiveRequest, cmd chan FileInteractiveResponse) {
 
 	area, _ := dial.GetContentArea()
 	area.SetSpacing(0)
-	if q.Attempt < 2 {
+	if q.Attempt < 2 && q.AskType != FILE_INTERACTIVE_ASK_PANIC {
 		area.Add(choice)
 	}
 	area.ShowAll()
