@@ -271,11 +271,35 @@ func GUI_Iteration() {
 }
 
 func GUI_Warn_SrcUnread(pre_read_errs string) {
-	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, "Not all files can be read :\n"+pre_read_errs)
+	err_txt := "Not all files can be read:"
+	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, err_txt+"\n"+pre_read_errs)
+	dial.SetMarkup("<b>" + HtmlEscape(err_txt) + "</b>\n" + HtmlEscape(pre_read_errs))
 	dial.SetTitle("Some problems?")
+	dial.Connect("destroy", func() {
+		AppExit(0)
+	})
 	resp := dial.Run()
 	if resp == gtk.RESPONSE_OK {
 		dial.Close()
+		AppExit(0)
+	} else {
+		AppExit(0)
+	}
+}
+
+func GUI_Warn_SrcDstEqual(path_folder string) {
+	err_txt := "Can't move folder inside itself:"
+	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, err_txt+"\n"+path_folder)
+	dial.SetMarkup("<b>" + HtmlEscape(err_txt) + "</b>\n" + HtmlEscape(path_folder))
+	dial.SetTitle("Invalid operation!")
+	dial.Connect("destroy", func() {
+		AppExit(0)
+	})
+	resp := dial.Run()
+	if resp == gtk.RESPONSE_OK {
+		dial.Close()
+		AppExit(0)
+	} else {
 		AppExit(0)
 	}
 }
@@ -285,6 +309,9 @@ func GUI_Warn_SrcDelete(path_src_visual string, clear_mode bool) {
 	dial.SetTitle("Delete files?")
 	dial.SetMarkup("<b>Delete?</b>\n" + HtmlEscape(path_src_visual) + "<b> ?</b>")
 	dial.SetDefaultResponse(gtk.RESPONSE_OK)
+	dial.Connect("destroy", func() {
+		AppExit(0)
+	})
 	resp := dial.Run()
 	if resp == gtk.RESPONSE_OK {
 		dial.Close()

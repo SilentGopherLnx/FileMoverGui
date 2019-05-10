@@ -34,12 +34,12 @@ https://github.com/SilentGopherLnx/easygolang
 App is under development (you can see version if run with "-v" argument)
 
 **Not all functions are implemented and realised as planned!** such as:
+- ask if folders gonna be merged, else use "os.Rename()" for full folder tree (not file by file!)
 - detail information for compare existing files when ask for repace
 - copy "modified time" files
 - writing files to temporary name (half-copied files will not be looked as "ok")
 - corect speed and time left calculation
 - free space check
-- ask if folders gonna be merged
 - ask for options for symlink...
 
 # Platform & License:

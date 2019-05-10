@@ -1,3 +1,4 @@
 FileMoverGui
-test/*
+.fuse*
 *.sh
+test/*

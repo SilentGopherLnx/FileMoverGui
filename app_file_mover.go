@@ -190,6 +190,9 @@ func main() {
 	visual_arr := []string{}
 	for j := 0; j < len(path_src); j++ {
 		visual_arr = append(visual_arr, path_src[j].GetVisual())
+		if FolderPathEndSlash(path_src[j].GetReal()) == FolderPathEndSlash(path_dst.GetReal()) {
+			GUI_Warn_SrcDstEqual(path_src[j].GetVisual())
+		}
 	}
 	path_src_visual = StringJoin(visual_arr, "\n")
 
