@@ -4,8 +4,6 @@ import (
 	. "github.com/SilentGopherLnx/easygolang"
 	. "github.com/SilentGopherLnx/easygolang/easygtk"
 
-	//	. "github.com/SilentGopherLnx/easygolang/easylinux"
-
 	"github.com/gotk3/gotk3/gtk"
 	//"github.com/gotk3/gotk3/gdk"
 )
@@ -73,12 +71,34 @@ func GUI_Create() {
 
 	title_func(0)
 
-	lbl_src_name, _ := gtk.LabelNew("SRC:")
-	lbl_src_name.SetMarkup("<b>Selected files:</b>")
-	lbl_src_name.SetHExpand(true)
-	lbl_src_name.SetHAlign(gtk.ALIGN_START)
+	// ========================
 
-	lbl_src, _ := gtk.LabelNew(path_src_visual)
+	box_src_disk, _ := GTK_LabelPair("Disk SRC: ", src_disk)
+	box_dst_disk, _ := GTK_LabelPair("Disk DST: ", dst_disk)
+
+	// ========================
+
+	lbl_src_folder_title, _ := gtk.LabelNew("SRC:")
+	lbl_src_folder_title.SetMarkup("<b>Source folder:</b>")
+	lbl_src_folder_title.SetHExpand(true)
+	lbl_src_folder_title.SetVExpand(false)
+	lbl_src_folder_title.SetHAlign(gtk.ALIGN_START)
+
+	lbl_src_folder, _ := gtk.LabelNew(src_folder)
+	lbl_src_folder.SetHExpand(true)
+	lbl_src_folder.SetHAlign(gtk.ALIGN_START)
+	//lbl_src_folder.SetJustify(gtk.JUSTIFY_LEFT)
+	lbl_src_folder.SetVAlign(gtk.ALIGN_START)
+	GTK_LabelWrapMode(lbl_src_folder, 1)
+
+	// ========================
+
+	lbl_src_title, _ := gtk.LabelNew("Selected files:")
+	lbl_src_title.SetMarkup("<b>Selected files:</b>")
+	lbl_src_title.SetHExpand(true)
+	lbl_src_title.SetHAlign(gtk.ALIGN_START)
+
+	lbl_src, _ := gtk.LabelNew(src_names)
 	lbl_src.SetHExpand(true)
 	lbl_src.SetVAlign(gtk.ALIGN_START)
 	lbl_src.SetHAlign(gtk.ALIGN_START)
@@ -92,28 +112,28 @@ func GUI_Create() {
 	//scroll_scr.SetOverlayScrolling(true)
 	//scroll_scr.SetSizeRequest()
 
-	frame, _ := gtk.FrameNew("<b>Selected files:</b>")
-	frame.SetLabelWidget(lbl_src_name)
+	frame, _ := gtk.FrameNew("Selected files:")
+	frame.SetLabelWidget(lbl_src_title)
 	frame.Add(scroll_scr)
 
-	lbl_dst_name, _ := gtk.LabelNew("DST:")
-	lbl_dst_name.SetMarkup("<b>Destination folder:</b>")
-	lbl_dst_name.SetHExpand(true)
-	lbl_dst_name.SetVExpand(false)
-	lbl_dst_name.SetHAlign(gtk.ALIGN_START)
+	// ========================
+
+	lbl_dst_folder_title, _ := gtk.LabelNew("DST:")
+	lbl_dst_folder_title.SetMarkup("<b>Destination folder:</b>")
+	lbl_dst_folder_title.SetHExpand(true)
+	lbl_dst_folder_title.SetVExpand(false)
+	lbl_dst_folder_title.SetHAlign(gtk.ALIGN_START)
+
+	lbl_dst_folder, _ := gtk.LabelNew(path_dst.GetVisual())
+	lbl_dst_folder.SetHExpand(true)
+	lbl_dst_folder.SetHAlign(gtk.ALIGN_START)
+	//lbl_dst.SetJustify(gtk.JUSTIFY_LEFT)
+	lbl_dst_folder.SetVAlign(gtk.ALIGN_START)
+	GTK_LabelWrapMode(lbl_dst_folder, 1)
+
+	// ========================
 
 	lbl_separator1, _ := gtk.LabelNew(" ")
-
-	lbl_dst, _ := gtk.LabelNew(path_dst.GetVisual())
-	lbl_dst.SetHExpand(true)
-	lbl_dst.SetHAlign(gtk.ALIGN_START)
-	//lbl_dst.SetJustify(gtk.JUSTIFY_LEFT)
-	lbl_dst.SetVAlign(gtk.ALIGN_START)
-	GTK_LabelWrapMode(lbl_dst, 1)
-
-	box_vdst, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-	box_vdst.Add(lbl_dst_name)
-	box_vdst.Add(lbl_dst)
 
 	calc := "calculating..."
 
@@ -124,16 +144,15 @@ func GUI_Create() {
 
 	lbl_separator2, _ := gtk.LabelNew(" ")
 
-	box_src_disk, _ := GTK_LabelPair("Disk SRC: ", src_disk)
-	box_dst_disk, _ := GTK_LabelPair("Disk DST: ", dst_disk)
-
-	lbl_separator3, _ := gtk.LabelNew(" ")
+	// ========================
 
 	var box_speed, box_timepassed, box_timeleft, box_done *gtk.Box
 	box_speed, lbl_speed = GTK_LabelPair("Speed: ", calc)
 	box_timepassed, lbl_timepassed = GTK_LabelPair("Time passed: ", calc)
 	box_timeleft, lbl_timeleft = GTK_LabelPair("Time left: ", calc)
 	box_done, lbl_done = GTK_LabelPair("Done: ", calc)
+
+	// ========================
 
 	progress, _ = gtk.ProgressBarNew()
 
@@ -149,16 +168,11 @@ func GUI_Create() {
 	box_current.Add(spinner)
 	box_current.Add(lbl_current)
 
-	//img2 := GTK_Image_From_Name("process-stop", gtk.ICON_SIZE_BUTTON)
-	// btn_abort, _ := gtk.ButtonNewWithLabel("Abort")
-	// btn_abort.SetImage(img2)
-	// btn_abort.SetProperty("always-show-image", true)
-	// btn_abort.Connect("button-press-event", func() {
-	// 	AppExit(0)
-	// })
+	// ========================
 
 	grid, _ := gtk.GridNew()
 	grid.SetColumnSpacing(10)
+	grid.SetColumnHomogeneous(true)
 
 	gui_w := 1
 	if oper_single {
@@ -167,21 +181,27 @@ func GUI_Create() {
 
 	grid.Attach(box_src_disk, 0, 0, gui_w, 1)
 	//grid.Attach(lbl_src_name, 0, 1, gui_w, 1)
-	grid.Attach(frame, 0, 1, gui_w, 2)
-	grid.Attach(lbl_separator1, 0, 3, gui_w, 1)
-	grid.Attach(box_src_size, 0, 4, gui_w, 1)
-	grid.Attach(box_src_files, 0, 5, gui_w, 1)
+	//grid.Attach(frame, 0, 1, gui_w, 2)
+	grid.Attach(lbl_src_folder_title, 0, 1, 1, 1)
+	grid.Attach(lbl_src_folder, 0, 2, 1, 1)
+	grid.Attach(frame, 0, 3, 2, 1)
 
 	if !oper_single {
 		grid.Attach(box_dst_disk, 1, 0, 1, 1)
-		//grid.Attach(lbl_dst_name, 1, 1, 1, 1)
-		//grid.Attach(lbl_dst, 1, 2, 1, 1)
-		grid.Attach(box_vdst, 1, 1, 1, 2)
-		grid.Attach(lbl_separator2, 1, 3, 1, 1)
+		grid.Attach(lbl_dst_folder_title, 1, 1, 1, 1)
+		grid.Attach(lbl_dst_folder, 1, 2, 1, 1)
+		//grid.Attach(box_vdst, 1, 1, 1, 2)
+	}
+
+	grid.Attach(lbl_separator1, 0, 3, gui_w, 1)
+	grid.Attach(box_src_size, 0, 4, gui_w, 1)
+	grid.Attach(box_src_files, 0, 5, gui_w, 1)
+	if !oper_single {
 		grid.Attach(box_dst_free, 1, 4, 1, 1)
 	}
 
-	grid.Attach(lbl_separator3, 0, 10, 2, 1)
+	grid.Attach(lbl_separator2, 0, 10, 2, 1)
+
 	grid.Attach(box_timepassed, 0, 11, 1, 1)
 	grid.Attach(box_timeleft, 1, 11, 1, 1)
 	grid.Attach(box_done, 0, 12, 1, 1)
@@ -214,9 +234,11 @@ func GUI_Iteration() {
 	gtk.MainIteration()
 
 	sizebytes := src_size.Get()
-	freebytes := dst_free.Get()
 	lbl_src_size.SetText(FileSizeNiceString(sizebytes) + " (" + I2Ss(sizebytes) + " bytes)")
-	lbl_dst_free.SetText(FileSizeNiceString(freebytes)) //+ " (" + I2Ss(freebytes) + " bytes)")
+	if !oper_single {
+		freebytes := dst_free.Get()
+		lbl_dst_free.SetText(FileSizeNiceString(freebytes)) //+ " (" + I2Ss(freebytes) + " bytes)")
+	}
 
 	sel_files := src_files.Get()
 	sel_folders := src_folders.Get()
@@ -263,7 +285,7 @@ func GUI_Iteration() {
 		title_func(perc * 100.0)
 	}
 
-	if !work.Get() && GTK_SpinnerActive(spinner, true) {
+	if !work.Get() && spinner != nil && GTK_SpinnerActive(spinner, true) {
 		Prln("spinner off!")
 		spinner.Stop()
 	}
@@ -272,7 +294,7 @@ func GUI_Iteration() {
 
 func GUI_Warn_SrcUnread(pre_read_errs string) {
 	err_txt := "Not all files can be read:"
-	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, err_txt+"\n"+pre_read_errs)
+	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, err_txt+"\n"+pre_read_errs)
 	dial.SetMarkup("<b>" + HtmlEscape(err_txt) + "</b>\n" + HtmlEscape(pre_read_errs))
 	dial.SetTitle("Some problems?")
 	dial.Connect("destroy", func() {
@@ -289,7 +311,7 @@ func GUI_Warn_SrcUnread(pre_read_errs string) {
 
 func GUI_Warn_SrcDstEqual(path_folder string) {
 	err_txt := "Can't move folder inside itself:"
-	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, err_txt+"\n"+path_folder)
+	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, err_txt+"\n"+path_folder)
 	dial.SetMarkup("<b>" + HtmlEscape(err_txt) + "</b>\n" + HtmlEscape(path_folder))
 	dial.SetTitle("Invalid operation!")
 	dial.Connect("destroy", func() {
@@ -304,16 +326,44 @@ func GUI_Warn_SrcDstEqual(path_folder string) {
 	}
 }
 
-func GUI_Warn_SrcDelete(path_src_visual string, clear_mode bool) {
-	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK_CANCEL, "Delete? :\n"+path_src_visual)
-	dial.SetTitle("Delete files?")
-	dial.SetMarkup("<b>Delete?</b>\n" + HtmlEscape(path_src_visual) + "<b> ?</b>")
+func GUI_Warn_SrcDelete(path_src_folder string, path_src_names string, clear_mode bool) {
+	msg := "Delete"
+	if clear_mode {
+		msg = "Clear"
+	}
+	reported := NewAtomicBool(false, [2]string{"", ""})
+	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK_CANCEL, msg+"? :")
+	dial.SetTitle(msg + " files?")
+	//dial.SetMarkup("<b>" + msg + "</b> :\n" + HtmlEscape(path_src_names) + "<b>?</b>\nin folder:\n" + HtmlEscape(path_src_folder))
+	dial.SetMarkup("<b>" + msg + " at path:</b>\n" + HtmlEscape(FolderPathEndSlash(path_src_folder)))
 	dial.SetDefaultResponse(gtk.RESPONSE_OK)
 	dial.Connect("destroy", func() {
-		AppExit(0)
+		if !reported.Get() {
+			AppExit(0)
+		}
 	})
+
+	this_txt := "this folder(s)/file(s)? :"
+	lbl_name, _ := gtk.LabelNew(this_txt)
+	lbl_name.SetMarkup("<b>" + HtmlEscape(this_txt) + "</b>")
+	frame, _ := gtk.FrameNew(this_txt)
+	frame.SetLabelWidget(lbl_name)
+	//frame.SetHExpand(true)
+	scroll, _ := gtk.ScrolledWindowNew(nil, nil)
+	//scroll.SetVExpand(true)
+	//scroll.SetHExpand(true)
+	text, _ := gtk.LabelNew(path_src_names)
+	//text.SetHExpand(true)
+	scroll.Add(text)
+	frame.Add(scroll)
+	area, _ := dial.GetContentArea()
+	area.SetSpacing(0)
+	area.Add(frame)
+	area.ShowAll()
+
 	resp := dial.Run()
 	if resp == gtk.RESPONSE_OK {
+		reported.Set(true)
 		dial.Close()
 	} else {
 		AppExit(0)

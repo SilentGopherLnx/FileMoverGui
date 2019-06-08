@@ -35,10 +35,10 @@ App is under development (you can see version if run with "-v" argument)
 
 **Not all functions are implemented and realised as planned!** such as:
 - ask if folders gonna be merged, else use "os.Rename()" for full folder tree (not file by file!)
-- detail information for compare existing files when ask for repace
+- detail information for compare existing files when ask for replace
 - copy "modified time" files
 - writing files to temporary name (half-copied files will not be looked as "ok")
-- corect speed and time left calculation
+- correct speed and time left calculation
 - free space check
 - ask for options for symlink...
 
@@ -73,7 +73,7 @@ Windows support is NOT planned
 
 **-dst** is always folder
 
-**-buf** buffer size of bytes for file copy operations. Value will ne multiplied by 1024 
+**-buf** buffer size of bytes for file copy operations. Value will be multiplied by 1024 
 
 # -src & -dst path format:
 I tried to use url file scheme from Copy/Paste and Drag&Drop operations.

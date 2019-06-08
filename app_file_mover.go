@@ -49,6 +49,9 @@ var gui_chan_ask chan FileInteractiveRequest = make(chan FileInteractiveRequest)
 
 var src_disk, dst_disk string
 
+var src_folder = ""
+var src_names = ""
+
 func init() {
 
 	AboutVersion(AppVersion())
@@ -150,7 +153,7 @@ func init() {
 		//go func() {
 		dp = FilePathEndSlashRemove(dp)
 		Prln(">>" + dp)
-		dst_free.Set(FolderLinuxFreeSpace(dp))
+		dst_free.Set(LinuxFolderFreeSpace(dp))
 		//}()
 	}
 
@@ -187,17 +190,24 @@ func main() {
 		GUI_Warn_SrcUnread(pre_read_errs)
 	}
 
+	src_names = ""
 	visual_arr := []string{}
 	for j := 0; j < len(path_src); j++ {
 		visual_arr = append(visual_arr, path_src[j].GetVisual())
+		if files_src[j].IsDir() {
+			src_names += FolderPathEndSlash(path_src[j].GetLastNode()) + "\n"
+		} else {
+			src_names += FilePathEndSlashRemove(path_src[j].GetLastNode()) + "\n"
+		}
 		if FolderPathEndSlash(path_src[j].GetReal()) == FolderPathEndSlash(path_dst.GetReal()) {
 			GUI_Warn_SrcDstEqual(path_src[j].GetVisual())
 		}
 	}
+	src_folder = FolderPathEndSlash(LinuxFileGetParent(path_src[0].GetReal()))
 	path_src_visual = StringJoin(visual_arr, "\n")
 
 	if oper_single {
-		GUI_Warn_SrcDelete(path_src_visual, operation == OPERATION_CLEAR)
+		GUI_Warn_SrcDelete(LinuxFileGetParent(path_src[0].GetReal()), src_names, operation == OPERATION_CLEAR)
 	}
 
 	go oper_switch_runner()
@@ -206,7 +216,6 @@ func main() {
 
 	//timelast := TimeNow()
 	for {
-
 		GUI_Iteration()
 
 		select {
@@ -231,11 +240,11 @@ func main() {
 }
 
 func oper_switch_runner() {
-	Prln(operation)
+	Prln("what is the command: " + operation)
 	for j := 0; j < len(path_src); j++ {
 		FoldersRecursively_Size(mount_list, files_src[j], path_src[j].GetReal(), src_size, src_files, src_folders, src_unread, src_irregular, src_mount, src_symlinks)
 	}
-	Prln("starting...")
+	Prln("starting command...")
 	work.Set(true)
 	switch operation {
 	case OPERATION_COPY:
@@ -250,13 +259,15 @@ func oper_switch_runner() {
 		}
 	case OPERATION_DELETE:
 		for j := 0; j < len(path_src); j++ {
-			FoldersRecursively_Delete(mount_list, files_src[j], path_src[j].GetReal(), done_bytes, done_files, current_file)
+			FoldersRecursively_Delete(mount_list, files_src[j], path_src[j].GetReal(), done_bytes, done_files, current_file, false)
 		}
 	case OPERATION_CLEAR:
-
+		for j := 0; j < len(path_src); j++ {
+			FoldersRecursively_Delete(mount_list, files_src[j], path_src[j].GetReal(), done_bytes, done_files, current_file, true)
+		}
 	}
 	work.Set(false)
-	if done_bytes.Get() == src_size.Get() {
+	if done_bytes.Get() == src_size.Get() && done_files.Get() == src_files.Get() {
 		Prln("done")
 		AppExit(0)
 	} else {
