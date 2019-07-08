@@ -172,8 +172,8 @@ func main() {
 			if FilePathEndSlashRemove(real1) != FilePathEndSlashRemove(real2) {
 				path_src[j].SetReal(real2)
 			}
-			finfo, ok := FileInfo(real2)
-			if ok {
+			finfo, err := FileInfo(real2, false)
+			if err == nil {
 				files_src = append(files_src, finfo)
 			} else {
 				problem = true
