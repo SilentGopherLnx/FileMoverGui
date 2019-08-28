@@ -35,7 +35,7 @@ var done_bytes *AInt64 = NewAtomicInt64(0)
 var done_files *AInt64 = NewAtomicInt64(0)
 var current_file *AString = NewAtomicString("")
 
-var work = NewAtomicBool(false, [2]string{"Y", "N"})
+var work = NewAtomicBool(false)
 
 var time_start *Time = nil
 var time_end *Time = nil
@@ -53,9 +53,10 @@ var src_folder = ""
 var src_names = ""
 
 func init() {
-
 	AboutVersion(AppVersion())
+}
 
+func main() {
 	var path_src_url string = ""
 	var path_dst_url string = ""
 	var buf_1024 = 0
@@ -76,8 +77,8 @@ func init() {
 	if operation == OPERATION_DEMO {
 		oper_demo = true
 		// operation = "copy"
-		// path_src_url = "file:///mnt/dm-1/golang/my_code/FileMoverGui/test/file1.txt"
-		// path_dst_url = "file:///mnt/dm-1/golang/my_code/FileMoverGui/test/to/"
+		// path_src_url = "file:///mnt/dm-1/golang/my_code/FileMoverGui/test_dir/file1.txt"
+		// path_dst_url = "file:///mnt/dm-1/golang/my_code/FileMoverGui/test_dir/to/"
 
 		// operation = "copy"
 		// path_src_url = "file:///mnt/dm-1/golang/my_code/GopherFileManager/test_dir/New Folder/"
@@ -159,10 +160,6 @@ func init() {
 
 	GUI_Init()
 
-}
-
-func main() {
-
 	pre_read_errs := ""
 	for j := 0; j < len(path_src); j++ {
 		problem := false
@@ -242,20 +239,22 @@ func main() {
 func oper_switch_runner() {
 	Prln("what is the command: " + operation)
 	for j := 0; j < len(path_src); j++ {
-		FoldersRecursively_Size(mount_list, files_src[j], path_src[j].GetReal(), src_size, src_files, src_folders, src_unread, src_irregular, src_mount, src_symlinks)
+		FoldersRecursively_Size(mount_list, files_src[j], path_src[j].GetReal(), src_size, src_files, src_folders, src_unread, src_irregular, src_mount, src_symlinks, nil)
 	}
 	Prln("starting command...")
 	work.Set(true)
 	switch operation {
 	case OPERATION_COPY:
 		dst_real := path_dst.GetReal()
+		cmd_saved := ""
 		for j := 0; j < len(path_src); j++ {
-			FoldersRecursively_Copy(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_files, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file)
+			cmd_saved = FoldersRecursively_Copy(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_files, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file, cmd_saved)
 		}
 	case OPERATION_MOVE:
 		dst_real := path_dst.GetReal()
+		cmd_saved := ""
 		for j := 0; j < len(path_src); j++ {
-			FoldersRecursively_Move(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_files, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file, src_disk == dst_disk)
+			cmd_saved = FoldersRecursively_Move(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_files, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file, cmd_saved, src_disk == dst_disk)
 		}
 	case OPERATION_DELETE:
 		for j := 0; j < len(path_src); j++ {

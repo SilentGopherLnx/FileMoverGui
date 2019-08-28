@@ -331,7 +331,7 @@ func GUI_Warn_SrcDelete(path_src_folder string, path_src_names string, clear_mod
 	if clear_mode {
 		msg = "Clear"
 	}
-	reported := NewAtomicBool(false, [2]string{"", ""})
+	reported := NewAtomicBool(false)
 	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK_CANCEL, msg+"? :")
 	dial.SetTitle(msg + " files?")
 	//dial.SetMarkup("<b>" + msg + "</b> :\n" + HtmlEscape(path_src_names) + "<b>?</b>\nin folder:\n" + HtmlEscape(path_src_folder))
@@ -372,7 +372,7 @@ func GUI_Warn_SrcDelete(path_src_folder string, path_src_names string, clear_mod
 
 func GUI_Ask_File(q FileInteractiveRequest, cmd chan FileInteractiveResponse) {
 
-	reported := NewAtomicBool(false, [2]string{"", ""})
+	reported := NewAtomicBool(false)
 
 	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, q.FileName)
 
@@ -391,7 +391,12 @@ func GUI_Ask_File(q FileInteractiveRequest, cmd chan FileInteractiveResponse) {
 	case FILE_INTERACTIVE_ASK_PANIC:
 		qs[0], qs[1] = "File problem with:", "Unsolvable =("
 	}
-	dial.SetMarkup("<b>" + HtmlEscape(qs[0]) + "</b>\n" + HtmlEscape(q.FileName) + "\n<b>" + HtmlEscape(qs[1]) + "</b>")
+
+	qerr := ""
+	if len(q.ErrorText) > 0 {
+		qerr = "\n\n<i>" + HtmlEscape(q.ErrorText) + "</i>"
+	}
+	dial.SetMarkup("<b>" + HtmlEscape(qs[0]) + "</b>\n" + HtmlEscape(q.FileName) + qerr + "\n<b>" + HtmlEscape(qs[1]) + "</b>")
 
 	choice, _ := gtk.CheckButtonNewWithLabel("Remember choice")
 
