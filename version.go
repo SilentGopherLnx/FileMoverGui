@@ -1,11 +1,11 @@
 package main
 
 func AppVersion() string {
-	return "0.1.11" //mover
+	return "0.1.12" //mover
 }
 
 func AppAuthor() string {
-	return "SilentGopherLnx (2019-...)"
+	return "SilentGopherLnx (2019-2020)"
 }
 
 func AppMail() string {

@@ -32,7 +32,7 @@ var src_mount *AInt64 = NewAtomicInt64(0)
 var src_symlinks *AInt64 = NewAtomicInt64(0)
 var dst_free *AInt64 = NewAtomicInt64(0)
 var done_bytes *AInt64 = NewAtomicInt64(0)
-var done_files *AInt64 = NewAtomicInt64(0)
+var done_fobjects *AInt64 = NewAtomicInt64(0)
 var current_file *AString = NewAtomicString("")
 
 var work = NewAtomicBool(false)
@@ -248,28 +248,28 @@ func oper_switch_runner() {
 		dst_real := path_dst.GetReal()
 		cmd_saved := ""
 		for j := 0; j < len(path_src); j++ {
-			cmd_saved = FoldersRecursively_Copy(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_files, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file, cmd_saved)
+			cmd_saved = FoldersRecursively_Copy(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_fobjects, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file, cmd_saved)
 		}
 	case OPERATION_MOVE:
 		dst_real := path_dst.GetReal()
 		cmd_saved := ""
 		for j := 0; j < len(path_src); j++ {
-			cmd_saved = FoldersRecursively_Move(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_files, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file, cmd_saved, src_disk == dst_disk)
+			cmd_saved = FoldersRecursively_Move(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_fobjects, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file, cmd_saved, src_disk == dst_disk)
 		}
 	case OPERATION_DELETE:
 		for j := 0; j < len(path_src); j++ {
-			FoldersRecursively_Delete(mount_list, files_src[j], path_src[j].GetReal(), done_bytes, done_files, current_file, false)
+			FoldersRecursively_Delete(mount_list, files_src[j], path_src[j].GetReal(), done_bytes, done_fobjects, current_file, false)
 		}
 	case OPERATION_CLEAR:
 		for j := 0; j < len(path_src); j++ {
-			FoldersRecursively_Delete(mount_list, files_src[j], path_src[j].GetReal(), done_bytes, done_files, current_file, true)
+			FoldersRecursively_Delete(mount_list, files_src[j], path_src[j].GetReal(), done_bytes, done_fobjects, current_file, true)
 		}
 	}
 	work.Set(false)
-	if done_bytes.Get() == src_size.Get() && done_files.Get() == src_files.Get() {
+	if done_bytes.Get() == src_size.Get() && done_fobjects.Get() == src_files.Get()+src_folders.Get() {
 		Prln("done")
 		AppExit(0)
 	} else {
-		Prln("done, waiting...")
+		Prln("done, waiting..." + I2S64(done_fobjects.Get()) + "/" + I2S64(src_files.Get()))
 	}
 }

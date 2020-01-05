@@ -275,7 +275,7 @@ func GUI_Iteration() {
 	lbl_timepassed.SetText(I2S(int(passed)) + " seconds")
 	lbl_timeleft.SetText(tleft + " seconds")
 
-	lbl_done.SetText(StringEnd("   "+F2S(perc*100.0, 2), 6) + "% (" + I2Ss(sizedone) + " bytes) " + I2S64(done_files.Get()) + " objects")
+	lbl_done.SetText(StringEnd("   "+F2S(perc*100.0, 2), 6) + "% (" + I2Ss(sizedone) + " bytes) " + I2S64(done_fobjects.Get()) + " objects")
 
 	current_text := current_file.Get()
 	lbl_current.SetText(current_text)
