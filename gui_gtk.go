@@ -51,7 +51,7 @@ func GUI_Create() {
 	btn_icon.SetImage(icon_oper)
 	btn_icon.SetProperty("always-show-image", true)
 	btn_icon.Connect("button-press-event", func() {
-		Dialog_About(win, AppVersion(), AppAuthor(), AppMail(), AppRepository(), GetFlag_Russian())
+		Dialog_About(win, AppVersion(), AppAuthor(), AppMail(), AppRepository(), "", GetFlag_Russian())
 	})
 
 	//img := GTK_Image_From_File(appdir+"gui/button_abort.png", "png")
@@ -267,9 +267,17 @@ func GUI_Iteration() {
 
 	tleft := "0"
 	if w && sizedone > 0.0 && passed > 1.0 {
-		tleft = F2S(float64(sizebytes-sizedone)*passed/float64(sizedone), 0)
-		speed := F2S(float64(sizedone)/passed/float64(BytesInMb), 2)
+		//speed_v := float64(sizedone)/passed
+		speed_per_second := float64(copy_speed.Get())
+		speed := F2S(speed_per_second/float64(BytesInMb), 2)
+
 		lbl_speed.SetText(speed + " MB/s")
+
+		size_left := float64(sizebytes - sizedone)
+		//tleft = F2S(size_left*passed/float64(sizedone), 0)
+		if speed_per_second > 0 {
+			tleft = F2S(size_left/speed_per_second, 0)
+		}
 	}
 
 	lbl_timepassed.SetText(I2S(int(passed)) + " seconds")

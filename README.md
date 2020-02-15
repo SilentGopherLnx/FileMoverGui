@@ -10,6 +10,7 @@ This app do file operations and shows progress by GTK-gui.
 It also make check is you can do this. App can ask you some classic questions (also by GTK-gui):
 - This file already exist in destination folder. Replace it?
 - Can't read (or write) file. Try again or ignore?
+- Destination foler already exist. Merge this folders?
 - There are not enought space on disk. Try again?
 
 and so on...
@@ -38,7 +39,6 @@ App is under development (you can see version if run with "-v" argument)
 - detail information for compare existing files when ask for replace
 - copy "modified time" files
 - writing files to temporary name (half-copied files will not be looked as "ok")
-- correct speed and time left calculation
 - free space check
 - ask for options for symlink...
 

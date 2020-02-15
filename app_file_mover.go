@@ -209,6 +209,8 @@ func main() {
 
 	go oper_switch_runner()
 
+	go speed_counter()
+
 	GUI_Create()
 
 	//timelast := TimeNow()
@@ -271,5 +273,19 @@ func oper_switch_runner() {
 		AppExit(0)
 	} else {
 		Prln("done, waiting..." + I2S64(done_fobjects.Get()) + "/" + I2S64(src_files.Get()))
+	}
+}
+
+var done_new int64
+var done_prev int64
+var copy_speed *AInt64 = NewAtomicInt64(0)
+
+func speed_counter() {
+	for {
+		done_new = done_bytes.Get()
+		done_delta := done_new - done_prev
+		copy_speed.Set(done_delta)
+		done_prev = done_new
+		SleepMS(1000)
 	}
 }
