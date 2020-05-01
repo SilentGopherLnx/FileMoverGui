@@ -59,8 +59,8 @@ var src_names = ""
 var langs *LangArr
 
 func init() {
-	Prln("file mover  - inited")
 	AboutVersion(AppVersion())
+	Prln("File mover  - inited")
 	langs = InitLang(FolderPathEndSlash(FolderLocation_App()+"localization") + "translation_mover.cfg")
 }
 
