@@ -32,7 +32,7 @@ https://github.com/SilentGopherLnx/easygolang
 (this package also have some unnessesary sub-packages)
 
 # Status:
-App is under development (you can see version if run with "-v" argument)
+App is under development and looks freaky (you can see version if run with "-v" argument)
 
 **Not all functions are implemented and realised as planned!** such as:
 - ask if folders gonna be merged, else use "os.Rename()" for full folder tree (not file by file!)
@@ -41,6 +41,9 @@ App is under development (you can see version if run with "-v" argument)
 - writing files to temporary name (half-copied files will not be looked as "ok")
 - free space check
 - ask for options for symlink...
+
+**News**
+- 0.2.0 - multi-language support (english default, russian on config file too), renaming now here too
 
 # Platform & License:
 **Only Linux!** Tested only on amd64 on Cinnamon desktop of Linux Mint.
@@ -68,12 +71,18 @@ Windows support is NOT planned
 > delete - delete files list from **-src**
 >
 > clear - delete files in **-src** folders (files in list will be ignored, folders will be cleared) (not implemented!)
+>
+> rename - rename dialog window for  **-src** file
 
 **-src** is files and/or folders list, separated by new line symbol (not "\n" string)
 
 **-dst** is always folder
 
 **-buf** buffer size of bytes for file copy operations. Value will be multiplied by 1024 
+
+**-lang** language code (in config file, "en" (english) is default)
+
+**-v** you can see version of this app if run with only this one argument
 
 # -src & -dst path format:
 I tried to use url file scheme from Copy/Paste and Drag&Drop operations.

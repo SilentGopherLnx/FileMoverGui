@@ -1,11 +1,11 @@
 package main
 
 import (
-	"flag"
-	"os"
-
 	. "github.com/SilentGopherLnx/easygolang"
 	. "github.com/SilentGopherLnx/easygolang/easylinux"
+
+	"flag"
+	"os"
 )
 
 const OPERATION_DEMO = "demo"
@@ -13,6 +13,10 @@ const OPERATION_COPY = "copy"
 const OPERATION_MOVE = "move"
 const OPERATION_DELETE = "delete"
 const OPERATION_CLEAR = "clear"
+const OPERATION_RENAME = "rename"
+
+//const OPERATION_NEWFILE = "newfile"
+//const OPERATION_NEWFOLDER = "newfolder"
 
 var operation string
 var oper_single = false
@@ -52,18 +56,24 @@ var src_disk, dst_disk string
 var src_folder = ""
 var src_names = ""
 
+var langs *LangArr
+
 func init() {
+	Prln("file mover  - inited")
 	AboutVersion(AppVersion())
+	langs = InitLang(FolderPathEndSlash(FolderLocation_App()+"localization") + "translation_mover.cfg")
 }
 
 func main() {
 	var path_src_url string = ""
 	var path_dst_url string = ""
 	var buf_1024 = 0
+	var lang string = ""
 
 	flag.StringVar(&operation, "cmd", OPERATION_DEMO, "copy,move,delete,clear")
 	flag.StringVar(&path_src_url, "src", "", "source url array (new line is separator) - file:// or smb:// and ....")
 	flag.StringVar(&path_dst_url, "dst", "", "destination url folder file:// or smb:// and ....")
+	flag.StringVar(&lang, "lang", DEFAULT_LANG, "en or another lang")
 	flag.IntVar(&buf_1024, "buf", 64, "buffer size in bytes (value will be multiplied by 1024!!)")
 	flag.Parse()
 
@@ -71,6 +81,9 @@ func main() {
 		Prln("wrong flags")
 		AppExit(1)
 	}
+	Prln("file mover - args parsed")
+
+	langs.SetLang(lang)
 
 	BUFFER_SIZE = MINI(256, MAXI(1, buf_1024)) * 1024
 
@@ -88,7 +101,7 @@ func main() {
 	}
 
 	operation = StringDown(StringTrim(operation))
-	oper_arr := []string{OPERATION_COPY, OPERATION_MOVE, OPERATION_DELETE, OPERATION_CLEAR}
+	oper_arr := []string{OPERATION_COPY, OPERATION_MOVE, OPERATION_DELETE, OPERATION_CLEAR, OPERATION_RENAME}
 	if StringInArray(operation, oper_arr) == -1 {
 		Prln("Wrong operation command")
 		AppExit(2)
@@ -115,7 +128,7 @@ func main() {
 		AppExit(4)
 	}
 
-	if operation == OPERATION_DELETE || operation == OPERATION_CLEAR {
+	if operation == OPERATION_DELETE || operation == OPERATION_CLEAR || operation == OPERATION_RENAME {
 		oper_single = true
 	} else {
 		if len(path_dst_url) == 0 {
@@ -204,37 +217,61 @@ func main() {
 	path_src_visual = StringJoin(visual_arr, "\n")
 
 	if oper_single {
-		GUI_Warn_SrcDelete(LinuxFileGetParent(path_src[0].GetReal()), src_names, operation == OPERATION_CLEAR)
+		if operation == OPERATION_DELETE || operation == OPERATION_CLEAR {
+			GUI_Warn_SrcDelete(LinuxFileGetParent(path_src[0].GetReal()), src_names, operation == OPERATION_CLEAR)
+		} else {
+			if operation == OPERATION_RENAME { // || operation == OPERATION_NEWFILE ||  operation == OPERATION_NEWFOLDER{
+				fpath2 := FolderPathEndSlash(src_folder)
+				old_name := files_src[0].Name()
+				f_rename := func(new_name string) (bool, string) {
+					safe_name := new_name
+					// ADD CHECK!!!!!
+					// Windows (FAT32, NTFS): Any Unicode except NUL, \, /, :, *, ", <, >, |
+					// Mac(HFS, HFS+): Any valid Unicode except : or /
+					// Linux(ext[2-4]): Any byte except NUL or /
+					if safe_name != old_name {
+						ok, err_txt := FileRename(fpath2+old_name, fpath2+safe_name)
+						if ok {
+							return true, ""
+						} else {
+							return false, err_txt
+						}
+					}
+					return false, "?"
+				}
+				GUI_FileRename(fpath2, old_name, f_rename)
+			}
+		}
 	}
 
-	go oper_switch_runner()
+	if operation != OPERATION_RENAME { // || operation == OPERATION_NEWFILE ||  operation == OPERATION_NEWFOLDER{
+		go oper_switch_runner()
+		go speed_counter()
+		GUI_Create()
 
-	go speed_counter()
+		//timelast := TimeNow()
+		for {
+			GUI_Iteration()
 
-	GUI_Create()
+			select {
+			case q := <-gui_chan_ask:
+				GUI_Ask_File(q, gui_chan_cmd)
+			default:
+				//CONTINUE!!
+			}
 
-	//timelast := TimeNow()
-	for {
-		GUI_Iteration()
+			//q, ok := ChanGetOrSkip(gui_chan_cmd.(chan interface{}))
+			// if ok {
+			// 	str := q.(string)
+			// 	GUI_Ask_File(str, gui_chan_cmd)
+			// }
 
-		select {
-		case q := <-gui_chan_ask:
-			GUI_Ask_File(q, gui_chan_cmd)
-		default:
-			//CONTINUE!!
+			// if TimeSeconds(timelast) > 0.5 {
+			// 	//win.ShowAll()
+			// 	timelast = TimeNow()
+			// }
+			RuntimeGosched()
 		}
-
-		//q, ok := ChanGetOrSkip(gui_chan_cmd.(chan interface{}))
-		// if ok {
-		// 	str := q.(string)
-		// 	GUI_Ask_File(str, gui_chan_cmd)
-		// }
-
-		// if TimeSeconds(timelast) > 0.5 {
-		// 	//win.ShowAll()
-		// 	timelast = TimeNow()
-		// }
-		RuntimeGosched()
 	}
 }
 
@@ -256,7 +293,11 @@ func oper_switch_runner() {
 		dst_real := path_dst.GetReal()
 		cmd_saved := ""
 		for j := 0; j < len(path_src); j++ {
-			cmd_saved = FoldersRecursively_Move(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_fobjects, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file, cmd_saved, src_disk == dst_disk)
+			//simple := false
+			cmd_saved, _ = FoldersRecursively_Move(mount_list, files_src[j], path_src[j].GetReal(), dst_real, done_bytes, done_fobjects, BUFFER_SIZE, gui_chan_cmd, gui_chan_ask, current_file, cmd_saved, src_disk == dst_disk)
+			// if simple {
+			// 	FoldersRecursively_Size(mount_list, files_src[j], path_src[j].GetReal(), src_size, src_files, src_folders, src_unread, src_irregular, nil, nil, nil)
+			// }
 		}
 	case OPERATION_DELETE:
 		for j := 0; j < len(path_src); j++ {

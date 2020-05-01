@@ -73,13 +73,13 @@ func GUI_Create() {
 
 	// ========================
 
-	box_src_disk, _ := GTK_LabelPair("Disk SRC: ", src_disk)
-	box_dst_disk, _ := GTK_LabelPair("Disk DST: ", dst_disk)
+	box_src_disk, _ := GTK_LabelPair(langs.GetStr("disk_src")+": ", src_disk)
+	box_dst_disk, _ := GTK_LabelPair(langs.GetStr("disk_dst")+": ", dst_disk)
 
 	// ========================
 
-	lbl_src_folder_title, _ := gtk.LabelNew("SRC:")
-	lbl_src_folder_title.SetMarkup("<b>Source folder:</b>")
+	lbl_src_folder_title, _ := gtk.LabelNew(langs.GetStr("folder_source") + ":")
+	lbl_src_folder_title.SetMarkup("<b>" + langs.GetStr("folder_source") + ":</b>")
 	lbl_src_folder_title.SetHExpand(true)
 	lbl_src_folder_title.SetVExpand(false)
 	lbl_src_folder_title.SetHAlign(gtk.ALIGN_START)
@@ -93,8 +93,8 @@ func GUI_Create() {
 
 	// ========================
 
-	lbl_src_title, _ := gtk.LabelNew("Selected files:")
-	lbl_src_title.SetMarkup("<b>Selected files:</b>")
+	lbl_src_title, _ := gtk.LabelNew(langs.GetStr("selected_files") + ":")
+	lbl_src_title.SetMarkup("<b>" + langs.GetStr("selected_files") + ":</b>")
 	lbl_src_title.SetHExpand(true)
 	lbl_src_title.SetHAlign(gtk.ALIGN_START)
 
@@ -112,14 +112,14 @@ func GUI_Create() {
 	//scroll_scr.SetOverlayScrolling(true)
 	//scroll_scr.SetSizeRequest()
 
-	frame, _ := gtk.FrameNew("Selected files:")
+	frame, _ := gtk.FrameNew(langs.GetStr("selected_files") + ":")
 	frame.SetLabelWidget(lbl_src_title)
 	frame.Add(scroll_scr)
 
 	// ========================
 
-	lbl_dst_folder_title, _ := gtk.LabelNew("DST:")
-	lbl_dst_folder_title.SetMarkup("<b>Destination folder:</b>")
+	lbl_dst_folder_title, _ := gtk.LabelNew(langs.GetStr("folder_destination") + ":")
+	lbl_dst_folder_title.SetMarkup("<b>" + langs.GetStr("folder_destination") + ":</b>")
 	lbl_dst_folder_title.SetHExpand(true)
 	lbl_dst_folder_title.SetVExpand(false)
 	lbl_dst_folder_title.SetHAlign(gtk.ALIGN_START)
@@ -138,19 +138,19 @@ func GUI_Create() {
 	calc := "calculating..."
 
 	var box_src_size, box_src_files, box_dst_free *gtk.Box
-	box_src_size, lbl_src_size = GTK_LabelPair("Selected total size: ", calc)
-	box_src_files, lbl_src_files = GTK_LabelPair("Selected objects: ", calc)
-	box_dst_free, lbl_dst_free = GTK_LabelPair("Destination free space: ", calc)
+	box_src_size, lbl_src_size = GTK_LabelPair(langs.GetStr("selected_size")+": ", calc)
+	box_src_files, lbl_src_files = GTK_LabelPair(langs.GetStr("selected_objects")+": ", calc)
+	box_dst_free, lbl_dst_free = GTK_LabelPair(langs.GetStr("disk_dst_space")+": ", calc)
 
 	lbl_separator2, _ := gtk.LabelNew(" ")
 
 	// ========================
 
 	var box_speed, box_timepassed, box_timeleft, box_done *gtk.Box
-	box_speed, lbl_speed = GTK_LabelPair("Speed: ", calc)
-	box_timepassed, lbl_timepassed = GTK_LabelPair("Time passed: ", calc)
-	box_timeleft, lbl_timeleft = GTK_LabelPair("Time left: ", calc)
-	box_done, lbl_done = GTK_LabelPair("Done: ", calc)
+	box_speed, lbl_speed = GTK_LabelPair(langs.GetStr("lbl_speed")+": ", calc)
+	box_timepassed, lbl_timepassed = GTK_LabelPair(langs.GetStr("lbl_time_passed")+": ", calc)
+	box_timeleft, lbl_timeleft = GTK_LabelPair(langs.GetStr("lbl_time_left")+": ", calc)
+	box_done, lbl_done = GTK_LabelPair(langs.GetStr("lbl_done")+": ", calc)
 
 	// ========================
 
@@ -222,8 +222,21 @@ func title_func(perc float64) {
 	if perc > 0.0 {
 		new_txt = " - " + F2S(perc, 2) + "%"
 	}
+	txt_op := operation
+	switch operation {
+	case OPERATION_MOVE:
+		txt_op = langs.GetStr("cmd_move")
+	case OPERATION_COPY:
+		txt_op = langs.GetStr("cmd_copy")
+	case OPERATION_DELETE:
+		txt_op = langs.GetStr("cmd_delete")
+	case OPERATION_CLEAR:
+		txt_op = langs.GetStr("cmd_clear")
+		//case OPERATION_RENAME:
+		//txt_op = langs.GetStr("cmd_rename")
+	}
 	if new_txt != title_prev_perc {
-		txt := StringTitle(operation) + new_txt
+		txt := StringTitle(txt_op) + new_txt
 		win.SetTitle(txt)
 		header.SetTitle(txt)
 		title_prev_perc = new_txt
@@ -234,7 +247,7 @@ func GUI_Iteration() {
 	gtk.MainIteration()
 
 	sizebytes := src_size.Get()
-	lbl_src_size.SetText(FileSizeNiceString(sizebytes) + " (" + I2Ss(sizebytes) + " bytes)")
+	lbl_src_size.SetText(FileSizeNiceString(sizebytes) + " (" + I2Ss(sizebytes) + " " + langs.GetStr("of_bytes") + ")")
 	if !oper_single {
 		freebytes := dst_free.Get()
 		lbl_dst_free.SetText(FileSizeNiceString(freebytes)) //+ " (" + I2Ss(freebytes) + " bytes)")
@@ -242,7 +255,7 @@ func GUI_Iteration() {
 
 	sel_files := src_files.Get()
 	sel_folders := src_folders.Get()
-	lbl_src_files.SetText(I2S64(sel_files+sel_folders) + " (" + I2S64(sel_files) + " files & " + I2S64(sel_folders) + " folders)")
+	lbl_src_files.SetText(I2S64(sel_files+sel_folders) + " (" + I2S64(sel_files) + " " + langs.GetStr("of_files") + " & " + I2S64(sel_folders) + " " + langs.GetStr("of_folders") + ")")
 
 	passed := 0.0
 	w := work.Get()
@@ -280,10 +293,10 @@ func GUI_Iteration() {
 		}
 	}
 
-	lbl_timepassed.SetText(I2S(int(passed)) + " seconds")
-	lbl_timeleft.SetText(tleft + " seconds")
+	lbl_timepassed.SetText(I2S(int(passed)) + " " + langs.GetStr("of_seconds"))
+	lbl_timeleft.SetText(tleft + " " + langs.GetStr("of_seconds"))
 
-	lbl_done.SetText(StringEnd("   "+F2S(perc*100.0, 2), 6) + "% (" + I2Ss(sizedone) + " bytes) " + I2S64(done_fobjects.Get()) + " objects")
+	lbl_done.SetText(StringEnd("   "+F2S(perc*100.0, 2), 6) + "% (" + I2Ss(sizedone) + " " + langs.GetStr("of_bytes") + ") " + I2S64(done_fobjects.Get()) + " " + langs.GetStr("of_objects"))
 
 	current_text := current_file.Get()
 	lbl_current.SetText(current_text)
@@ -301,10 +314,10 @@ func GUI_Iteration() {
 }
 
 func GUI_Warn_SrcUnread(pre_read_errs string) {
-	err_txt := "Not all files can be read:"
+	err_txt := langs.GetStr("err_notread") + ":"
 	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, err_txt+"\n"+pre_read_errs)
 	dial.SetMarkup("<b>" + HtmlEscape(err_txt) + "</b>\n" + HtmlEscape(pre_read_errs))
-	dial.SetTitle("Some problems?")
+	dial.SetTitle(langs.GetStr("err_main") + "?")
 	dial.Connect("destroy", func() {
 		AppExit(0)
 	})
@@ -318,10 +331,10 @@ func GUI_Warn_SrcUnread(pre_read_errs string) {
 }
 
 func GUI_Warn_SrcDstEqual(path_folder string) {
-	err_txt := "Can't move folder inside itself:"
+	err_txt := langs.GetStr("err_move_itself") + ":"
 	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, err_txt+"\n"+path_folder)
 	dial.SetMarkup("<b>" + HtmlEscape(err_txt) + "</b>\n" + HtmlEscape(path_folder))
-	dial.SetTitle("Invalid operation!")
+	dial.SetTitle(langs.GetStr("err_invalid_oper") + "!")
 	dial.Connect("destroy", func() {
 		AppExit(0)
 	})
@@ -334,16 +347,89 @@ func GUI_Warn_SrcDstEqual(path_folder string) {
 	}
 }
 
+func GUI_Ask_File(q FileInteractiveRequest, cmd chan FileInteractiveResponse) {
+
+	reported := NewAtomicBool(false)
+
+	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, q.FileName)
+
+	att := ""
+	if q.Attempt > 1 {
+		att = " [" + langs.GetStr("lbl_attempt") + "# " + I2S(q.Attempt) + "]"
+	}
+	dial.SetTitle(langs.GetStr("err_main") + att)
+
+	qs := [2]string{"", ""}
+	switch q.AskType {
+	case FILE_INTERACTIVE_ASK_EXIST:
+		qs[0], qs[1] = langs.GetStr("err_exist")+":", langs.GetStr("ask_replace")+"?"
+	case FILE_INTERACTIVE_ASK_ERROR:
+		qs[0], qs[1] = langs.GetStr("err_problem")+":", langs.GetStr("ask_again")+"?"
+	case FILE_INTERACTIVE_ASK_PANIC:
+		qs[0], qs[1] = langs.GetStr("err_problem")+":", langs.GetStr("err_unsolvable")+" =("
+	}
+
+	qerr := ""
+	if len(q.ErrorText) > 0 {
+		qerr = "\n\n<i>" + HtmlEscape(q.ErrorText) + "</i>"
+	}
+	dial.SetMarkup("<b>" + HtmlEscape(qs[0]) + "</b>\n" + HtmlEscape(q.FileName) + qerr + "\n<b>" + HtmlEscape(qs[1]) + "</b>")
+
+	choice, _ := gtk.CheckButtonNewWithLabel(langs.GetStr("check_remember"))
+
+	area, _ := dial.GetContentArea()
+	area.SetSpacing(0)
+	if q.Attempt < 2 && q.AskType != FILE_INTERACTIVE_ASK_PANIC {
+		area.Add(choice)
+	}
+	area.ShowAll()
+
+	if q.AskType == FILE_INTERACTIVE_ASK_PANIC { // stop/skip?
+		dial.SetDefaultResponse(gtk.RESPONSE_NO)
+		dial.AddButton(langs.GetStr("btn_ok"), gtk.RESPONSE_NO)
+	} else {
+		dial.SetDefaultResponse(gtk.RESPONSE_YES)
+		dial.AddButton("Yes", gtk.RESPONSE_YES)
+		if q.AskType == FILE_INTERACTIVE_ASK_EXIST {
+			dial.AddButton(langs.GetStr("btn_newname"), gtk.RESPONSE_ACCEPT)
+		}
+		dial.AddButton(langs.GetStr("btn_no"), gtk.RESPONSE_NO)
+	}
+	dial.Connect("destroy", func() {
+		if !reported.Get() {
+			cmd <- FileInteractiveResponse{SaveChoice: false, Command: FILE_INTERACTIVE_SKIP}
+		}
+	})
+
+	resp := dial.Run()
+
+	save := choice.GetActive()
+
+	if resp == gtk.RESPONSE_YES {
+		reported.Set(true)
+		cmd <- FileInteractiveResponse{SaveChoice: save, Command: FILE_INTERACTIVE_RETRY}
+	}
+	if resp == gtk.RESPONSE_ACCEPT {
+		reported.Set(true)
+		cmd <- FileInteractiveResponse{SaveChoice: save, Command: FILE_INTERACTIVE_NEWNAME}
+	}
+	if resp == gtk.RESPONSE_NO {
+		reported.Set(true)
+		cmd <- FileInteractiveResponse{SaveChoice: save, Command: FILE_INTERACTIVE_SKIP}
+	}
+	dial.Close()
+}
+
 func GUI_Warn_SrcDelete(path_src_folder string, path_src_names string, clear_mode bool) {
-	msg := "Delete"
+	msg := langs.GetStr("cmd_delete")
 	if clear_mode {
-		msg = "Clear"
+		msg = langs.GetStr("cmd_clear")
 	}
 	reported := NewAtomicBool(false)
 	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK_CANCEL, msg+"? :")
-	dial.SetTitle(msg + " files?")
+	dial.SetTitle(langs.GetStr("ask_confirm") + " " + msg + "?")
 	//dial.SetMarkup("<b>" + msg + "</b> :\n" + HtmlEscape(path_src_names) + "<b>?</b>\nin folder:\n" + HtmlEscape(path_src_folder))
-	dial.SetMarkup("<b>" + msg + " at path:</b>\n" + HtmlEscape(FolderPathEndSlash(path_src_folder)))
+	dial.SetMarkup("<b>" + msg + " " + langs.GetStr("of_path") + ":</b>\n" + HtmlEscape(FolderPathEndSlash(path_src_folder)))
 	dial.SetDefaultResponse(gtk.RESPONSE_OK)
 	dial.Connect("destroy", func() {
 		if !reported.Get() {
@@ -351,7 +437,7 @@ func GUI_Warn_SrcDelete(path_src_folder string, path_src_names string, clear_mod
 		}
 	})
 
-	this_txt := "this folder(s)/file(s)? :"
+	this_txt := langs.GetStr("lbl_this") + "? :"
 	lbl_name, _ := gtk.LabelNew(this_txt)
 	lbl_name.SetMarkup("<b>" + HtmlEscape(this_txt) + "</b>")
 	frame, _ := gtk.FrameNew(this_txt)
@@ -378,75 +464,47 @@ func GUI_Warn_SrcDelete(path_src_folder string, path_src_names string, clear_mod
 	}
 }
 
-func GUI_Ask_File(q FileInteractiveRequest, cmd chan FileInteractiveResponse) {
+func GUI_FileRename(fpath string, fname_old string, upd func(newname string) (bool, string)) {
+	fname_prev := FilePathEndSlashRemove(fname_old)
+	msg := langs.GetStr("ask_newname") + ":"
 
-	reported := NewAtomicBool(false)
+	dial, box := GTK_DialogMessage(nil, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, langs.GetStr("cmd_rename")+"?", msg+"\n"+fpath)
 
-	dial := gtk.MessageDialogNew(nil, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, q.FileName)
+	dial.SetMarkup("<b>" + msg + "</b>\n" + HtmlEscape(FolderPathEndSlash(fpath)))
 
-	att := ""
-	if q.Attempt > 1 {
-		att = " [attempt# " + I2S(q.Attempt) + "]"
-	}
-	dial.SetTitle("Problem" + att)
+	inp_name, _ := gtk.EntryNew()
+	inp_name.SetText(fname_prev)
+	inp_name.SetHExpand(true)
+	lbl_err, _ := gtk.LabelNew("")
+	lbl_err.SetHExpand(true)
+	lbl_err.SetVExpand(true)
+	box.SetOrientation(gtk.ORIENTATION_VERTICAL)
+	box.Add(inp_name)
+	box.Add(lbl_err)
 
-	qs := [2]string{"", ""}
-	switch q.AskType {
-	case FILE_INTERACTIVE_ASK_EXIST:
-		qs[0], qs[1] = "File exist at:", "Replace?"
-	case FILE_INTERACTIVE_ASK_ERROR:
-		qs[0], qs[1] = "File problem with:", "Try again?"
-	case FILE_INTERACTIVE_ASK_PANIC:
-		qs[0], qs[1] = "File problem with:", "Unsolvable =("
-	}
+	dial.ShowAll()
+	box.ShowAll()
 
-	qerr := ""
-	if len(q.ErrorText) > 0 {
-		qerr = "\n\n<i>" + HtmlEscape(q.ErrorText) + "</i>"
-	}
-	dial.SetMarkup("<b>" + HtmlEscape(qs[0]) + "</b>\n" + HtmlEscape(q.FileName) + qerr + "\n<b>" + HtmlEscape(qs[1]) + "</b>")
-
-	choice, _ := gtk.CheckButtonNewWithLabel("Remember choice")
-
-	area, _ := dial.GetContentArea()
-	area.SetSpacing(0)
-	if q.Attempt < 2 && q.AskType != FILE_INTERACTIVE_ASK_PANIC {
-		area.Add(choice)
-	}
-	area.ShowAll()
-
-	if q.AskType == FILE_INTERACTIVE_ASK_PANIC { // stop/skip?
-		dial.SetDefaultResponse(gtk.RESPONSE_NO)
-		dial.AddButton("OK", gtk.RESPONSE_NO)
+	ind := StringFindEnd(fname_prev, ".")
+	if ind == 0 || ind == 1 {
+		ind = StringLength(fname_prev)
 	} else {
-		dial.SetDefaultResponse(gtk.RESPONSE_YES)
-		dial.AddButton("Yes", gtk.RESPONSE_YES)
-		if q.AskType == FILE_INTERACTIVE_ASK_EXIST {
-			dial.AddButton("Save with new name", gtk.RESPONSE_ACCEPT)
-		}
-		dial.AddButton("No", gtk.RESPONSE_NO)
+		ind--
 	}
-	dial.Connect("destroy", func() {
-		if !reported.Get() {
-			cmd <- FileInteractiveResponse{SaveChoice: false, Command: FILE_INTERACTIVE_SKIP}
-		}
-	})
+	inp_name.SelectRegion(0, ind)
 
+L:
 	resp := dial.Run()
-
-	save := choice.GetActive()
-
-	if resp == gtk.RESPONSE_YES {
-		reported.Set(true)
-		cmd <- FileInteractiveResponse{SaveChoice: save, Command: FILE_INTERACTIVE_RETRY}
+	if resp == gtk.RESPONSE_OK {
+		result, _ := inp_name.GetText()
+		ok, err := upd(result)
+		if ok {
+			dial.Close()
+		} else {
+			lbl_err.SetText(err)
+			goto L
+		}
+	} else {
+		AppExit(0)
 	}
-	if resp == gtk.RESPONSE_ACCEPT {
-		reported.Set(true)
-		cmd <- FileInteractiveResponse{SaveChoice: save, Command: FILE_INTERACTIVE_NEWNAME}
-	}
-	if resp == gtk.RESPONSE_NO {
-		reported.Set(true)
-		cmd <- FileInteractiveResponse{SaveChoice: save, Command: FILE_INTERACTIVE_SKIP}
-	}
-	dial.Close()
 }
