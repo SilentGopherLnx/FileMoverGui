@@ -28,6 +28,7 @@ var title_prev_perc = "?"
 
 func GUI_Init() {
 	gtk.Init(nil)
+	Prln("gtk: " + GTK_GetVersion())
 }
 
 func GUI_Create() {

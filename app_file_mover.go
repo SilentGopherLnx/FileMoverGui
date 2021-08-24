@@ -104,6 +104,7 @@ func main() {
 	oper_arr := []string{OPERATION_COPY, OPERATION_MOVE, OPERATION_DELETE, OPERATION_CLEAR, OPERATION_RENAME}
 	if StringInArray(operation, oper_arr) == -1 {
 		Prln("Wrong operation command")
+		Prln("app" + AppVersion() + "/" + GetGolangVersion())
 		AppExit(2)
 	}
 
