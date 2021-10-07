@@ -1,6 +1,6 @@
 package main
 
-const app_version_mover = "0.2.1" // for automatc update check
+const app_version_mover = "0.2.2" // for automatc update check
 
 func AppVersion() string {
 	return app_version_mover

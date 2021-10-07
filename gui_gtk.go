@@ -221,7 +221,7 @@ func GUI_Create() {
 func title_func(perc float64) {
 	new_txt := ""
 	if perc > 0.0 {
-		new_txt = " - " + F2S(perc, 2) + "%"
+		new_txt = F2S(perc, 2) + "% - "
 	}
 	txt_op := operation
 	switch operation {
@@ -237,7 +237,7 @@ func title_func(perc float64) {
 		//txt_op = langs.GetStr("cmd_rename")
 	}
 	if new_txt != title_prev_perc {
-		txt := StringTitle(txt_op) + new_txt
+		txt := new_txt + StringTitle(txt_op)
 		win.SetTitle(txt)
 		header.SetTitle(txt)
 		title_prev_perc = new_txt

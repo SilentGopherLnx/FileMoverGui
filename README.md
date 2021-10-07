@@ -44,6 +44,8 @@ App is under development and looks freaky (you can see version if run with "-v" 
 
 **News**
 - 0.2.0 - multi-language support (english default, russian on config file too), renaming now here too
+- 0.2.1 - updated for **gotk3 0.6.1, golang 1.17**
+- 0.2.2 - percent before name on title
 
 # Platform & License:
 **Only Linux!** Tested only on amd64 on Cinnamon desktop of Linux Mint.
